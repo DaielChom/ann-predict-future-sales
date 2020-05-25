@@ -11,7 +11,7 @@ def load_dataset(dataset_dir):
     dataset["item_category_id"] = dataset.item_id.apply(get_category)
 
     # fix date index
-    dataset["date"] = pd.to_datetime([pd.Timestamp(i).date() for i in pd.to_datetime(dataset.date, format="%d.%M.%Y").values])
+    dataset["date"] = pd.to_datetime([pd.Timestamp(i).date() for i in pd.to_datetime(dataset.date, format="%d.%m.%Y").values])
     _ = dataset.pop("date_block_num")
 
     return dataset
