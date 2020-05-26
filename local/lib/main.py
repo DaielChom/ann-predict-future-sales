@@ -38,3 +38,47 @@ def get_base_dataset(dataset_dir):
     signals = shop_item.columns.tolist()
 
     return shop_item, signals
+
+def get_split_signal_data(signal, month_to_predict, look_back, dataset_dir, reshape=True):
+
+    # get signal data
+    shop_item, _ = get_base_dataset(dataset_dir)
+    signal_data = shop_item[[signal]]
+
+    # building dataset
+    columns = []
+    for i in [i for i in range(look_back-1)][::-1]:
+        
+        columns.append(signal+"-{}".format(i+1))
+        signal_data[signal+"-{}".format(i+1)] = signal_data[signal].shift(i+1)
+    columns.append(signal)
+
+    signal_data["target"] = signal_data[signal].shift(-1)
+    signal_data = signal_data.dropna()
+
+    # split dataset
+    train = signal_data[:-month_to_predict]
+    test = signal_data[-month_to_predict:]
+
+    X_train = train[columns].values
+    y_train = train["target"].values
+    i_train = train.index.tolist()
+
+    X_test = test[columns].values
+    y_test = test["target"].values
+    i_test = test.index.tolist()
+    
+    if reshape:
+        X_train = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+        y_train = y_train.reshape((y_train.shape[0], 1))
+
+        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
+        y_test = y_test.reshape((y_test.shape[0], 1))
+
+    return X_train, y_train, i_train, X_test, y_test, i_test
+
+
+
+
+
+
